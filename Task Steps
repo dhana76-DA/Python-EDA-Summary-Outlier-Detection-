@@ -69,4 +69,149 @@ plt.show()
 
 Histograms reveal that features such as SalePrice and LotArea are right-skewed, meaning there are a few very large values. Boxplots confirm this and highlight extreme outliers, which can be further handled using IQR or Z-score methods. Features like OverallQual or YearBuilt are more evenly distributed, showing less extreme variation.
 
+# Select numerical columns
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+
+# Dictionary to store outlier indices
+outliers_dict = {}
+
+# Detect outliers for each numerical column
+for col in num_cols:
+    Q1 = df[col].quantile(0.25)   # 25th percentile
+    Q3 = df[col].quantile(0.75)   # 75th percentile
+    IQR = Q3 - Q1                  # Interquartile range
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Get indices of outliers
+    outlier_indices = df[(df[col] < lower_bound) | (df[col] > upper_bound)].index
+    outliers_dict[col] = outlier_indices
+
+# Example: Number of outliers per column
+outlier_counts = {col: len(indices) for col, indices in outliers_dict.items()}
+outlier_counts
+
+
+Computes Q1, Q3, and IQR for each numerical column.
+
+Defines outlier bounds:
+Lower Bound= 𝑄1 − 1.5 × 𝐼𝑄𝑅,
+Upper Bound = 𝑄3 + 1.5 × 𝐼𝑄𝑅
+Lower Bound=Q1−1.5×IQR,Upper Bound=Q3+1.5×IQR
+
+Finds all rows with values outside these bounds.
+Stores indices of outliers in outliers_dict for each column.
+Shows number of outliers per column with outlier_counts.
+
+# Select numerical columns
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+
+# Initialize a column 'Outlier_Flag' with 0 (no outlier)
+df['Outlier_Flag'] = 0
+
+# Detect outliers and flag them
+for col in num_cols:
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Mark as 1 if outlier
+    df.loc[(df[col] < lower_bound) | (df[col] > upper_bound), 'Outlier_Flag'] = 1
+
+# Check first 10 rows to verify
+df[['Outlier_Flag'] + list(num_cols[:5])].head(10)
+What This Does
+
+Adds a new column: Outlier_Flag
+0 → Row has no outliers
+1 → Row has at least one outlier
+Checks all numerical columns for outliers using IQR.
+Can be used for filtering or analysis, e.g.:
+
+# Number of rows with outliers
+print("Rows with outliers:", df['Outlier_Flag'].sum())
+
+# Filter only outliers
+df_outliers = df[df['Outlier_Flag'] == 1]
+
+# Filter only clean rows
+df_clean = df[df['Outlier_Flag'] == 0]
+
+Why Handle Outliers
+Outliers can distort mean, std, and correlation, affecting models like linear regression.
+Some features, like SalePrice or LotArea, have extreme values that may not represent typical homes.
+But not all outliers are errors: e.g., very expensive houses are valid.
+
+Rule of thumb:
+Remove rows → if the value is clearly erroneous or extremely rare
+Cap values → if you want to keep all rows but reduce impact.
+
+Handling Outliers Using IQR
+We’ll use the IQR method, which we already applied for detection.
+
+# Copy dataset
+df_removed = df.copy()
+
+# Remove rows where 'Outlier_Flag' == 1
+df_removed = df_removed[df_removed['Outlier_Flag'] == 0]
+
+print("Shape before removing outliers:", df.shape)
+print("Shape after removing outliers:", df_removed.shape)
+Reasoning:
+Removes rows that have at least one extreme value.
+Useful if dataset is large enough and we want clean statistical analysis
+
+df_capped = df.copy()
+
+for col in num_cols:
+    Q1 = df_capped[col].quantile(0.25)
+    Q3 = df_capped[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    # Cap values at bounds
+    df_capped[col] = df_capped[col].clip(lower=lower_bound, upper=upper_bound)
+
+# Verify new min/max for a sample column
+print(df_capped['SalePrice'].describe())
+
+Keeps all rows, but reduces extreme impact.
+Maintains sample size, important for ML models or correlation analysis.
+Useful if outliers are valid extreme values, not errors.
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Select numerical columns only
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+
+# Compute correlation matrix
+corr_matrix = df[num_cols].corr()
+
+# Plot heatmap
+plt.figure(figsize=(15, 12))
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", cbar=True)
+plt.title("Correlation Matrix of Numerical Features", fontsize=16)
+plt.show()
+
+# Top correlations with SalePrice
+top_corr = corr_matrix['SalePrice'].sort_values(ascending=False)
+print("Top correlations with SalePrice:\n", top_corr.head(10))
+
+Features like OverallQual, GrLivArea, and GarageCars are the most important predictors of house price. Other features like LotArea and YearRemodAdd show moderate correlation. This information is useful for feature selection in regression models.
+
+# Suppose df_capped or df_removed is your cleaned dataset
+# We'll use df_capped (after capping outliers) for this example
+
+# Export to CSV
+df_capped.to_csv("house_prices_cleaned.csv", index=False)
+print("Cleaned dataset exported successfully!")
+
+# Load exported file to check
+df_check = pd.read_csv("house_prices_cleaned.csv")
+df_check.head()
+df_check.shape
 
