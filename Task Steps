@@ -1,0 +1,8 @@
+Steps Done: 
+Dataset download link: https://github.com/zeyongj/House-Prices-Advanced-Regression-Techniques/blob/main/train.csv
+
+Loading the dataset in googe colab:
+import pandas as pd
+url = "/content/train.csv"
+df = pd.read_csv(url)
+df.head()
