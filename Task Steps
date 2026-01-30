@@ -8,8 +8,65 @@ df = pd.read_csv(url)
 df.head()                                     # Display first 5 rows
 print("Dataset Shape:", df.shape)            # Check shape
 print("\nDataset Info:")
+
+What .info() Shows
+Column names
+Data types (int, float, object)
+Missing values (non-null counts)
+Memory usage
 df.info()                                     # Check dataset info
 
+df.describe()                                  # Generate descriptive statistics
+The descriptive statistics show that the average house sale price is around 1.8 lakh, with a large standard deviation, indicating high variability in house prices. The dataset contains 1460 records and 81 features. The lot area and sale price show wide ranges, suggesting the presence of potential outliers, making this dataset suitable for outlier detection.
 
+The dataset contains several columns with high percentages of missing values. Features such as PoolQC, MiscFeature, Alley, and Fence have more than 80% missing values, indicating these attributes are mostly unavailable and may be removed or carefully imputed. Columns like LotFrontage and garage-related features show moderate missing values, which require appropriate data cleaning techniques before analysis.
+
+# Calculate missing value percentage for each column
+missing_percent = (df.isnull().sum() / len(df)) * 100
+
+# Convert to DataFrame and sort
+missing_df = pd.DataFrame({
+    'Missing Values %': missing_percent
+}).sort_values(by='Missing Values %', ascending=False)
+missing_df.head(20)
+
+Histograms:
+Show distribution of values (normal, skewed, etc.)
+Helps identify skewed features (like SalePrice, LotArea)
+
+Boxplots:
+Show median, quartiles, and outliers
+Outliers appear as dots outside the whiskers
+Features like SalePrice, LotArea, GrLivArea often have extreme outliers
+Using .dropna() ensures missing values don’t break the plots.
+
+import matplotlib.pyplot as plt
+import math
+
+# Select numerical columns
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+n_cols = 4  # number of subplots per row
+n_rows = math.ceil(len(num_cols) / n_cols)  # compute rows needed
+
+# Histograms
+plt.figure(figsize=(20, 5*n_rows))                               #plt.figure(figsize=(20, 5*n_rows)) → adjusts figure height automatically.
+for i, col in enumerate(num_cols):
+    plt.subplot(n_rows, n_cols, i+1)
+    plt.hist(df[col].dropna(), bins=30, color='skyblue', edgecolor='black')
+    plt.title(f'Histogram of {col}')
+plt.tight_layout()
+plt.show()
+
+# Boxplots
+plt.figure(figsize=(20, 5*n_rows))                #plt.figure(figsize=(20, 5*n_rows)) → adjusts figure height automatically.
+for i, col in enumerate(num_cols):
+    plt.subplot(n_rows, n_cols, i+1)
+    plt.boxplot(df[col].dropna())
+    plt.title(f'Boxplot of {col}')
+plt.tight_layout()
+plt.show()
+
+
+Histograms reveal that features such as SalePrice and LotArea are right-skewed, meaning there are a few very large values. Boxplots confirm this and highlight extreme outliers, which can be further handled using IQR or Z-score methods. Features like OverallQual or YearBuilt are more evenly distributed, showing less extreme variation.
 
 
