@@ -3,6 +3,13 @@ Dataset download link: https://github.com/zeyongj/House-Prices-Advanced-Regressi
 
 Loading the dataset in googe colab:
 import pandas as pd
-url = "/content/train.csv"
+url = "/content/train.csv"                  # Load dataset from Local system. 
 df = pd.read_csv(url)
-df.head()
+df.head()                                     # Display first 5 rows
+print("Dataset Shape:", df.shape)            # Check shape
+print("\nDataset Info:")
+df.info()                                     # Check dataset info
+
+
+
+
