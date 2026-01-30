@@ -1,0 +1,93 @@
+Exploratory Data Analysis (EDA) — House Prices Dataset
+=======================================================
+
+1. Dataset Overview
+------------------
+- Number of rows: 1460
+- Number of columns: 81
+- Dataset contains various numerical and categorical features related to house attributes and sale prices.
+
+2. Missing Values
+-----------------
+- Columns with high missing values (>50%):
+  - PoolQC: 99.5%
+  - MiscFeature: 96.3%
+  - Alley: 93.8%
+  - Fence: 80.8%
+- Moderate missing values:
+  - LotFrontage: 17.7%
+  - Garage-related columns: ~5%
+- Recommendation:
+  - Drop columns with very high missing values.
+  - Impute moderate missing values with median or mode depending on feature type.
+
+3. Descriptive Statistics
+-------------------------
+- SalePrice:
+  - Mean: 180,921
+  - Std: 79,442
+  - Min: 34,900
+  - Max: 755,000
+- LotArea and SalePrice are right-skewed, indicating the presence of extreme values (outliers).
+
+4. Outlier Detection (IQR Method)
+---------------------------------
+- Outlier definition: Values below Q1 - 1.5*IQR or above Q3 + 1.5*IQR
+- Features with significant outliers:
+  - LotFrontage: 259
+  - GrLivArea: 50
+  - SalePrice: 28
+- Outlier Flag:
+  - Created 'Outlier_Flag' column: 0 = no outlier, 1 = at least one outlier
+  - Rows with outliers: ~900
+  - Rows without outliers: ~560
+
+5. Outlier Handling
+------------------
+- Strategy:
+  - Cap extreme values using IQR bounds (Winsorization) for numerical features to preserve all rows.
+  - Alternatively, remove extreme outliers for very skewed features if necessary.
+- Reason:
+  - Prevent distortion of mean, std, and correlations while keeping dataset size sufficient for analysis.
+
+6. Distribution Analysis
+------------------------
+- Histograms:
+  - SalePrice, LotArea, GrLivArea are right-skewed.
+  - Features like OverallQual and YearBuilt show near-uniform distribution.
+- Boxplots:
+  - Outliers are visually confirmed for SalePrice, LotArea, GrLivArea, and LotFrontage.
+
+7. Correlation Analysis
+-----------------------
+- Top correlations with SalePrice:
+  1. OverallQual: 0.79
+  2. GrLivArea: 0.71
+  3. GarageCars: 0.64
+  4. GarageArea: 0.62
+  5. TotalBsmtSF: 0.61
+  6. 1stFlrSF: 0.60
+  7. FullBath: 0.56
+  8. TotRmsAbvGrd: 0.53
+  9. YearBuilt: 0.52
+- Insights:
+  - Overall quality, living area, garage size, and basement area are the strongest predictors of house price.
+  - Number of rooms and bathrooms also contribute moderately.
+  - Newer houses tend to have higher prices.
+
+8. Summary / Key Findings
+-------------------------
+- House prices are influenced strongly by quality, area, and garage features.
+- Dataset contains many missing values; high-missing columns should be dropped or carefully imputed.
+- Outliers exist in several numerical features, can be handled by capping to reduce their impact.
+- Correlation analysis helps in **feature selection** for predictive modeling.
+- Cleaned dataset is ready for **modeling or further analysis**.
+
+9. Actions Taken
+----------------
+- Missing values identified and planned for imputation.
+- Outliers detected and capped using IQR method.
+- Outlier_Flag column created for reference.
+- Descriptive statistics and correlations analyzed.
+- Dataset exported as 'house_prices_cleaned.csv'.
+
